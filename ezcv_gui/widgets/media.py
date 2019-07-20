@@ -27,7 +27,6 @@ class MediaWidget(QWidget):
         layout = QVBoxLayout(self)
 
         layout.addWidget(self.pick_file_button)
-        layout.addStretch(1)
         layout.addWidget(self.media_shower)
 
     def on_media_updated(self, img: np.ndarray):
