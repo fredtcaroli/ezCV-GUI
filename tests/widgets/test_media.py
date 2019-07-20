@@ -77,7 +77,7 @@ def test_media_widget_pick_file_button_cancel_QFileDialog(qtbot):
 
     controller.new_media_loaded.connect(on_new_media_loaded)
     with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName',
-                    mock.MagicMock(return_value=(None, None))) as m:
+                    mock.MagicMock(return_value=('', None))) as m:
         qtbot.mouseClick(media.pick_file_button, Qt.LeftButton)
         qtbot.wait(1000)
 
