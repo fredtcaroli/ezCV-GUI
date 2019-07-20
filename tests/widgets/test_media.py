@@ -57,20 +57,11 @@ def test_media_widget_pick_file_button_triggers_image_update(qtbot, datadir):
     controller = EzCVController()
     media = MediaWidget(controller)
 
-    updated = False
-
-    def on_media_updated(img):
-        nonlocal updated
-        updated = True
-
     test_img_fname = os.path.join(datadir, 'img.png')
-    controller.media_updated.connect(on_media_updated)
     with qtbot.waitSignal(controller.media_updated, 1000), \
          mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName',
                     mock.MagicMock(return_value=(test_img_fname, None))) as m:
         qtbot.mouseClick(media.pick_file_button, Qt.LeftButton)
-
-    assert updated
 
 
 def test_media_widget_pick_file_button_cancel_QFileDialog(qtbot):
