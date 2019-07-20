@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow
 
 from ezcv_gui.controller import EzCVController
-from ezcv_gui.widgets.media import MediaWidget
+from ezcv_gui.widgets.central import CentralWidget
 
 
 class EzCV(QMainWindow):
@@ -9,7 +9,7 @@ class EzCV(QMainWindow):
         super().__init__(parent=parent)
         self._controller = EzCVController()
 
-        self.media = MediaWidget(self._controller, parent=self)
+        self.central = CentralWidget(self._controller, parent=self)
 
         self.initUI()
 
@@ -18,4 +18,4 @@ class EzCV(QMainWindow):
         self.setGeometry(300, 300, 250, 150)
         self.setWindowTitle('EzCV')
 
-        self.setCentralWidget(self.media)
+        self.setCentralWidget(self.central)
