@@ -14,6 +14,9 @@ class MediaWidget(QWidget):
 
         self._controller.media_updated.connect(self.on_media_updated)
 
+        self.loaded_media_fname = None
+        self.loaded_media = None
+
         self.media_shower = QLabel(self)
         self.pick_file_button = QPushButton(self)
 
@@ -31,4 +34,7 @@ class MediaWidget(QWidget):
         img = cv2.imread(fname)
         if img is None:
             raise ValueError("Couldn't open image located at %s" % fname)
-        self._controller.media_updated.emit(img)
+
+        self.loaded_media_fname = fname
+        self.loaded_media = img
+        self._controller.new_media_loaded.emit(img)

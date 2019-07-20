@@ -1,11 +1,12 @@
 import os
 from unittest import mock
 
+import cv2
 import numpy as np
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QPushButton, QFileDialog
+from PyQt5.QtWidgets import QPushButton
 
-from ezcv.test_utils import parametrize_img, build_img
+from ezcv.test_utils import parametrize_img
 from ezcv_gui.controller import EzCVController
 from ezcv_gui.widgets.media import MediaWidget
 
@@ -58,7 +59,7 @@ def test_media_widget_pick_file_button_triggers_image_update(qtbot, datadir):
     media = MediaWidget(controller)
 
     test_img_fname = os.path.join(datadir, 'img.png')
-    with qtbot.waitSignal(controller.media_updated, 1000), \
+    with qtbot.waitSignal(controller.new_media_loaded, 1000), \
          mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName',
                     mock.MagicMock(return_value=(test_img_fname, None))) as m:
         qtbot.mouseClick(media.pick_file_button, Qt.LeftButton)
@@ -68,16 +69,30 @@ def test_media_widget_pick_file_button_cancel_QFileDialog(qtbot):
     controller = EzCVController()
     media = MediaWidget(controller)
 
-    updated = False
+    loaded = False
 
-    def on_media_updated(img):
-        nonlocal updated
-        updated = True
+    def on_new_media_loaded(img):
+        nonlocal loaded
+        loaded = True
 
-    controller.media_updated.connect(on_media_updated)
+    controller.new_media_loaded.connect(on_new_media_loaded)
     with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName',
                     mock.MagicMock(return_value=(None, None))) as m:
         qtbot.mouseClick(media.pick_file_button, Qt.LeftButton)
         qtbot.wait(1000)
 
-    assert not updated
+    assert not loaded
+
+
+def test_media_widget_pick_file_button_saves_media_info(qtbot, datadir):
+    controller = EzCVController()
+    media = MediaWidget(controller)
+    test_img_fname = os.path.join(datadir, 'img.png')
+    test_img = cv2.imread(test_img_fname)
+    with qtbot.waitSignal(controller.new_media_loaded, 1000),\
+         mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName',
+                    mock.MagicMock(return_value=(test_img_fname, None))):
+        qtbot.mouseClick(media.pick_file_button, Qt.LeftButton)
+
+    assert media.loaded_media_fname == test_img_fname
+    assert np.all(media.loaded_media == test_img)
