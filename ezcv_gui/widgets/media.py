@@ -3,6 +3,7 @@ import numpy as np
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QFileDialog, QVBoxLayout
 
+from ezcv.pipeline import PipelineContext
 from ezcv_gui.controller import EzCVController
 from ezcv_gui.utils import img2QImage
 
@@ -18,7 +19,7 @@ class MediaWidget(QWidget):
         self.media_shower = QLabel(self)
         self.pick_file_button = QPushButton('Load Image', self)
 
-        self._controller.media_updated.connect(self.on_media_updated)
+        self._controller.media_processed.connect(self.on_media_processed)
         self.pick_file_button.clicked.connect(self.on_pick_file_button_click)
 
         self.initUi()
@@ -29,7 +30,7 @@ class MediaWidget(QWidget):
         layout.addWidget(self.pick_file_button)
         layout.addWidget(self.media_shower)
 
-    def on_media_updated(self, img: np.ndarray):
+    def on_media_processed(self, img: np.ndarray, ctx: PipelineContext):
         qimg = img2QImage(img)
         pix = QPixmap(qimg)
         self.media_shower.setPixmap(pix)

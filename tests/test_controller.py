@@ -17,13 +17,14 @@ def test_controller_media_updated_signal():
 
     all_good = False
     img = np.zeros((3, 3), dtype='uint8')
+    ctx = PipelineContext(img)
 
     def slot(x):
         nonlocal all_good
         all_good = x is img
 
-    controller.media_updated.connect(slot)
-    controller.media_updated.emit(img)
+    controller.media_processed.connect(slot)
+    controller.media_processed.emit(img, ctx)
     assert all_good
 
 
@@ -31,7 +32,7 @@ def test_controller_new_media_loaded_signal():
     controller = EzCVController()
 
     all_good = False
-    img = np.zeros((3, 3), dtype='uint8')
+    img = build_img((4, 4), rgb=True)
 
     def slot(x):
         nonlocal all_good
@@ -50,8 +51,9 @@ def test_controller_has_cvpipeline():
 def test_controller_run_cvpipeline_on_new_media_loaded():
     controller = EzCVController()
     img = build_img((4, 4), rgb=True)
+    ctx = PipelineContext(img)
     with mock.patch('ezcv.CompVizPipeline.run',
-                    mock.MagicMock(return_value=(img, None))) as m:
+                    mock.MagicMock(return_value=(img, ctx))) as m:
         controller.new_media_loaded.emit(img)
     m.assert_called_once()
 
@@ -59,7 +61,7 @@ def test_controller_run_cvpipeline_on_new_media_loaded():
 def test_controller_new_media_loaded_emits_media_updated(qtbot):
     controller = EzCVController()
     img = build_img((4, 4), rgb=True)
-    with qtbot.waitSignal(controller.media_updated, 1000):
+    with qtbot.waitSignal(controller.media_processed, 1000):
         controller.new_media_loaded.emit(img)
 
 
@@ -75,7 +77,7 @@ def test_controller_new_media_loaded_emits_media_updated_with_run_return_value()
         nonlocal all_okay
         all_okay = img is output_img
 
-    controller.media_updated.connect(slot)
+    controller.media_processed.connect(slot)
     with mock.patch('ezcv.CompVizPipeline.run',
                     mock.MagicMock(return_value=(output_img, ctx))):
         controller.new_media_loaded.emit(input_img)

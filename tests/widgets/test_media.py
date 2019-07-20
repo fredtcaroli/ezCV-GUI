@@ -6,6 +6,7 @@ import numpy as np
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QPushButton
 
+from ezcv.pipeline import PipelineContext
 from ezcv.test_utils import parametrize_img
 from ezcv_gui.controller import EzCVController
 from ezcv_gui.widgets.media import MediaWidget
@@ -22,10 +23,11 @@ def test_media_widget_shower_is_not_none(qtbot):
 
 
 @parametrize_img
-def test_media_widget_media_updated_signal(qtbot, img):
+def test_media_widget_media_processed_signal(qtbot, img):
     controller = EzCVController()
     media = MediaWidget(controller)
-    controller.media_updated.emit(img)
+    ctx = PipelineContext(img)
+    controller.media_processed.emit(img, ctx)
     pix = media.media_shower.pixmap()
     qimg = pix.toImage()
     if img.ndim == 2:

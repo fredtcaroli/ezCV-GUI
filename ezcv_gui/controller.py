@@ -4,11 +4,12 @@ from PyQt5.QtCore import pyqtSignal, QObject
 from ezcv import CompVizPipeline
 from ezcv.operator.implementations.blur import GaussianBlur
 from ezcv.operator.implementations.color_space import ColorSpaceChange
+from ezcv.pipeline import PipelineContext
 
 
 class EzCVController(QObject):
 
-    media_updated = pyqtSignal(np.ndarray)
+    media_processed = pyqtSignal(np.ndarray, PipelineContext)
     new_media_loaded = pyqtSignal(np.ndarray)
 
     def __init__(self):
@@ -28,4 +29,4 @@ class EzCVController(QObject):
 
     def on_new_media_loaded(self, img: np.ndarray):
         result_img, ctx = self.cvpipeline.run(img)
-        self.media_updated.emit(result_img)
+        self.media_processed.emit(result_img, ctx)
