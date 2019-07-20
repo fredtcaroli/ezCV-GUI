@@ -16,9 +16,19 @@ class MediaWidget(QWidget):
         self.loaded_media = None
 
         self.media_shower = QLabel(self)
-        self.pick_file_button = QPushButton(self)
+        self.pick_file_button = QPushButton('Load Image', self)
 
+        self._controller.media_updated.connect(self.on_media_updated)
         self.pick_file_button.clicked.connect(self.on_pick_file_button_click)
+
+        self.initUi()
+
+    def initUi(self):
+        layout = QVBoxLayout(self)
+
+        layout.addWidget(self.pick_file_button)
+        layout.addStretch(1)
+        layout.addWidget(self.media_shower)
 
     def on_media_updated(self, img: np.ndarray):
         qimg = img2QImage(img)

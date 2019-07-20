@@ -1,17 +1,21 @@
 from PyQt5.QtWidgets import QMainWindow
 
-from ezcv import CompVizPipeline
+from ezcv_gui.controller import EzCVController
+from ezcv_gui.widgets.media import MediaWidget
 
 
 class EzCV(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self._pipeline = CompVizPipeline()
+        self._controller = EzCVController()
+
+        self.media = MediaWidget(self._controller, parent=self)
 
         self.initUI()
 
     def initUI(self):
         self.statusBar()
-
         self.setGeometry(300, 300, 250, 150)
         self.setWindowTitle('EzCV')
+
+        self.setCentralWidget(self.media)
