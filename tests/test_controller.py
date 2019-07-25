@@ -1,6 +1,7 @@
 from unittest import mock
 
 import numpy as np
+from PyQt5.QtCore import pyqtSignal
 
 from ezcv.pipeline import PipelineContext
 from ezcv.test_utils import build_img
@@ -41,6 +42,20 @@ def test_controller_new_media_loaded_signal():
     controller.new_media_loaded.connect(slot)
     controller.new_media_loaded.emit(img)
     assert all_good
+
+
+def test_controller_operators_updated_signal():
+    controller = EzCVController()
+
+    called = False
+
+    def slot():
+        nonlocal called
+        called = True
+
+    controller.operators_updated.connect(slot)
+    controller.operators_updated.emit()
+    assert called
 
 
 def test_controller_has_cvpipeline():
