@@ -39,7 +39,7 @@ def test_media_widget_pick_file_button_triggers_pick_file_widget(qtbot, media_wi
 
 
 def test_media_widget_pick_file_button_triggers_show_media(qtbot, media_widget, controller, test_img_fname):
-    with qtbot.waitSignal(controller.show_media, 1000), \
+    with qtbot.waitSignal(controller.show_media, 100), \
          mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName',
                     mock.Mock(return_value=(test_img_fname, None))):
         qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
@@ -56,6 +56,6 @@ def test_media_widget_pick_file_button_cancel_QFileDialog(qtbot, media_widget, c
     with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as m:
         m.return_value = ('', None)
         qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
-        qtbot.wait(1000)
+        qtbot.wait(100)
 
     assert not loaded

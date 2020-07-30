@@ -1,5 +1,6 @@
 import os
 
+import cv2
 import pytest
 
 from ezcv_gui.controller import EzCVController
@@ -14,6 +15,11 @@ def datadir():
 @pytest.fixture
 def test_img_fname(datadir):
     return os.path.join(datadir, 'img.png')
+
+
+@pytest.fixture
+def test_img(test_img_fname):
+    return cv2.imread(test_img_fname)
 
 
 @pytest.fixture
