@@ -18,7 +18,7 @@ def media_widget(qtbot, controller):
 
 
 @parametrize_img
-def test_media_widget_media_processed_signal(controller, media_widget, img):
+def test_show_media(controller, media_widget, img):
     controller.show_media.emit(img)
     pix = media_widget.media_shower.pixmap()
     qimg = pix.toImage()
@@ -31,31 +31,25 @@ def test_media_widget_media_processed_signal(controller, media_widget, img):
     assert np.all(np.isclose(img, arr[..., :3]))
 
 
-def test_media_widget_pick_file_button_triggers_pick_file_widget(qtbot, media_widget, test_img_fname):
-    with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as m:
-        m.return_value = (test_img_fname, None)
-        qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
-        m.assert_called_once()
+class TestFilePopup:
+    def test_dialog_call(self, qtbot, media_widget, test_img_fname):
+        with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as m:
+            m.return_value = (test_img_fname, None)
+            qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
+            m.assert_called_once()
 
+    def test_emit_show_media_signal(self, qtbot, media_widget, controller, test_img_fname):
+        with mock.patch.object(controller, 'load_media') as m:
+            with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName',
+                            mock.Mock(return_value=(test_img_fname, None))):
+                qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
+                qtbot.wait(100)
+        m.assert_called_with(test_img_fname)
 
-def test_media_widget_pick_file_button_triggers_show_media(qtbot, media_widget, controller, test_img_fname):
-    with qtbot.waitSignal(controller.show_media, 100), \
-         mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName',
-                    mock.Mock(return_value=(test_img_fname, None))):
-        qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
-
-
-def test_media_widget_pick_file_button_cancel_QFileDialog(qtbot, media_widget, controller):
-    loaded = False
-
-    def on_new_media_loaded(img):
-        nonlocal loaded
-        loaded = True
-
-    controller.show_media.connect(on_new_media_loaded)
-    with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as m:
-        m.return_value = ('', None)
-        qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
-        qtbot.wait(100)
-
-    assert not loaded
+    def test_cancel_dialog(self, qtbot, media_widget, controller):
+        with mock.patch.object(controller, 'load_media') as m:
+            with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as dialog_m:
+                dialog_m.return_value = ('', None)
+                qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
+                qtbot.wait(100)
+        m.assert_not_called()
