@@ -13,9 +13,9 @@ class CentralWidget(QWidget):
         self.media = MediaWidget(self._controller, parent=self)
         self.pipeline = PipelineWidget(self._controller, parent=self)
 
-        self.initUi()
+        self.init_ui()
 
-    def initUi(self):
+    def init_ui(self):
         layout = QHBoxLayout(self)
 
         layout.addWidget(self.pipeline)

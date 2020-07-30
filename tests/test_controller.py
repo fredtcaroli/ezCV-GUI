@@ -1,90 +1,60 @@
 from unittest import mock
 
 import numpy as np
-from PyQt5.QtCore import pyqtSignal
 
-from ezcv.pipeline import PipelineContext
+from ezcv.operator.implementations.blur import GaussianBlur
+from ezcv.operator.implementations.color_space import ColorSpaceChange
 from ezcv.test_utils import build_img
 from ezcv_gui.controller import EzCVController
 
 
-def test_controller_instantiation():
+class TestControllerOperators:
+    def test_add_operator_call(self, controller):
+        with mock.patch('ezcv.CompVizPipeline.add_operator') as m:
+            controller.add_operator(GaussianBlur)
+        m.assert_called_once()
+
+    def test_operators_list(self, controller):
+        controller.add_operator(GaussianBlur)
+        operators = list(controller.operators.values())
+        assert len(operators) == 1
+        assert isinstance(operators[0], GaussianBlur)
+
+    def test_add_multiple_operators(self, controller):
+        controller.add_operator(GaussianBlur)
+        controller.add_operator(ColorSpaceChange)
+
+        operators = list(controller.operators.values())
+        assert len(operators) == 2
+        assert isinstance(operators[0], GaussianBlur)
+        assert isinstance(operators[1], ColorSpaceChange)
+
+    def test_add_same_operator_twice(self, controller):
+        controller.add_operator(GaussianBlur)
+        controller.add_operator(GaussianBlur)
+
+        operators = list(controller.operators.values())
+        assert len(operators) == 2
+        assert operators[0] != operators[1]
+
+
+def test_controller_run_cvpipeline_on_new_media_loaded(test_img_fname):
     controller = EzCVController()
-    assert controller is not None
-
-
-def test_controller_media_updated_signal():
-    controller = EzCVController()
-
-    all_good = False
-    img = np.zeros((3, 3), dtype='uint8')
-    ctx = PipelineContext(img)
-
-    def slot(x):
-        nonlocal all_good
-        all_good = x is img
-
-    controller.media_processed.connect(slot)
-    controller.media_processed.emit(img, ctx)
-    assert all_good
-
-
-def test_controller_new_media_loaded_signal():
-    controller = EzCVController()
-
-    all_good = False
-    img = build_img((4, 4), rgb=True)
-
-    def slot(x):
-        nonlocal all_good
-        all_good = x is img
-
-    controller.new_media_loaded.connect(slot)
-    controller.new_media_loaded.emit(img)
-    assert all_good
-
-
-def test_controller_operators_updated_signal():
-    controller = EzCVController()
-
-    called = False
-
-    def slot():
-        nonlocal called
-        called = True
-
-    controller.operators_updated.connect(slot)
-    controller.operators_updated.emit()
-    assert called
-
-
-def test_controller_has_cvpipeline():
-    controller = EzCVController()
-    assert controller.cvpipeline is not None
-
-
-def test_controller_run_cvpipeline_on_new_media_loaded():
-    controller = EzCVController()
-    img = build_img((4, 4), rgb=True)
-    ctx = PipelineContext(img)
-    with mock.patch('ezcv.CompVizPipeline.run',
-                    mock.MagicMock(return_value=(img, ctx))) as m:
-        controller.new_media_loaded.emit(img)
+    with mock.patch('ezcv.CompVizPipeline.run') as m:
+        m.side_effect = lambda i: (i, None)
+        controller.load_media(test_img_fname)
     m.assert_called_once()
 
 
-def test_controller_new_media_loaded_emits_media_updated(qtbot):
+def test_controller_new_media_loaded_emits_show_media(qtbot, test_img_fname):
     controller = EzCVController()
-    img = build_img((4, 4), rgb=True)
-    with qtbot.waitSignal(controller.media_processed, 1000):
-        controller.new_media_loaded.emit(img)
+    with qtbot.waitSignal(controller.show_media, 1000):
+        controller.load_media(test_img_fname)
 
 
-def test_controller_new_media_loaded_emits_media_updated_with_run_return_value():
+def test_controller_new_media_loaded_emits_media_updated_with_run_return_value(test_img_fname):
     controller = EzCVController()
-    input_img = build_img((4, 4), rgb=True)
     output_img = build_img((4, 4), rgb=True, kind='random')
-    ctx = PipelineContext(input_img)
 
     all_okay = False
 
@@ -92,9 +62,9 @@ def test_controller_new_media_loaded_emits_media_updated_with_run_return_value()
         nonlocal all_okay
         all_okay = img is output_img
 
-    controller.media_processed.connect(slot)
-    with mock.patch('ezcv.CompVizPipeline.run',
-                    mock.MagicMock(return_value=(output_img, ctx))):
-        controller.new_media_loaded.emit(input_img)
+    controller.show_media.connect(slot)
+    with mock.patch('ezcv.CompVizPipeline.run') as m:
+        m.return_value = (output_img, None)
+        controller.load_media(test_img_fname)
 
     assert all_okay

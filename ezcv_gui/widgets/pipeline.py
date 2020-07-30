@@ -1,7 +1,7 @@
-from PyQt5.QtCore import QRect, QModelIndex
+from PyQt5.QtCore import QModelIndex
 from PyQt5.QtWidgets import QWidget, QListWidget, QPushButton, QVBoxLayout
 
-from ezcv.operator import get_available_operators, Operator
+from ezcv.operator import get_available_operators
 from ezcv_gui.controller import EzCVController
 
 
@@ -17,9 +17,9 @@ class PipelineWidget(QWidget):
         self.add_operator_button.clicked.connect(self.on_add_operator_button_click)
         self._controller.operators_updated.connect(self.on_operators_updated)
 
-        self.initUi()
+        self.init_ui()
 
-    def initUi(self):
+    def init_ui(self):
         layout = QVBoxLayout(self)
 
         layout.addWidget(self.add_operator_button)

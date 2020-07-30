@@ -11,11 +11,11 @@ class EzCV(QMainWindow):
 
         self.central = CentralWidget(self._controller, parent=self)
 
-        self.initUI()
+        self.init_ui()
 
-    def initUI(self):
+    def init_ui(self):
         self.statusBar()
-        self.setGeometry(300, 300, 250, 150)
+        self.setGeometry(300, 300, 800, 600)
         self.setWindowTitle('EzCV')
 
         self.setCentralWidget(self.central)

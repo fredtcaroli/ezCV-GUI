@@ -1,43 +1,59 @@
-from typing import Type
+from typing import Type, Dict, Optional
 
-import numpy as np
+import cv2
 from PyQt5.QtCore import pyqtSignal, QObject
 
 from ezcv import CompVizPipeline
 from ezcv.operator import Operator
-from ezcv.pipeline import PipelineContext
+from ezcv.typing import Image
 
 
 class EzCVController(QObject):
 
-    media_processed = pyqtSignal(np.ndarray, PipelineContext)
-    new_media_loaded = pyqtSignal(np.ndarray)
+    show_media = pyqtSignal(Image)
     operators_updated = pyqtSignal()
 
     def __init__(self):
         super().__init__()
 
         self.cvpipeline = CompVizPipeline()
-        self.curr_media = None
+        self.curr_media: Optional[Image] = None
+        self._names_generator = _OperatorNameGenerator()
 
-        self.new_media_loaded.connect(self.on_new_media_loaded)
-        self.operators_updated.connect(self.process_curr_media)
+        self.operators_updated.connect(self._on_operators_updated)
+
+    def _on_operators_updated(self):
+        if self.curr_media is not None:
+            self.process_curr_media()
 
     def add_operator(self, operator_cls: Type[Operator]):
         operator = operator_cls()
-        operator_name = operator_cls.__name__
+        operator_name = self._names_generator.generate_name(operator_cls)
         self.cvpipeline.add_operator(operator_name, operator)
         self.operators_updated.emit()
 
-    def on_new_media_loaded(self, img: np.ndarray):
+    def process_curr_media(self):
+        result_img, ctx = self.cvpipeline.run(self.curr_media)
+        self.show_media.emit(result_img)
+
+    def load_media(self, fname: str):
+        img = cv2.imread(fname)
+        if img is None:
+            raise ValueError("Couldn't open image located at %s" % fname)
         self.curr_media = img
         self.process_curr_media()
-
-    def process_curr_media(self):
-        # TODO Handle curr media is None
-        result_img, ctx = self.cvpipeline.run(self.curr_media)
-        self.media_processed.emit(result_img, ctx)
 
     @property
     def operators(self):
         return self.cvpipeline.operators
+
+
+class _OperatorNameGenerator:
+    def __init__(self):
+        self._names_repo: Dict[Type[Operator], int] = dict()
+
+    def generate_name(self, op_cls: Type[Operator]) -> str:
+        idx = self._names_repo.setdefault(op_cls, 0)
+        name = op_cls.__name__ + (f'_{idx}' if idx > 0 else '')
+        self._names_repo[op_cls] += 1
+        return name
