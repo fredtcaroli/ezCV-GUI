@@ -12,7 +12,7 @@ class PipelineWidget(QWidget):
 
         self.operators_list = QListWidget(self)
         self.add_operator_button = QPushButton('Add Operator', self)
-        self.add_operator_popup = AddOperatorPopup(self._controller)
+        self.add_operator_popup = AddOperatorWidget(self._controller)
 
         self.add_operator_button.clicked.connect(self.on_add_operator_button_click)
         self._controller.operators_updated.connect(self.on_operators_updated)
@@ -33,17 +33,17 @@ class PipelineWidget(QWidget):
         self.operators_list.addItems(self._controller.operators.keys())
 
 
-class AddOperatorPopup(QWidget):
+class AddOperatorWidget(QWidget):
     def __init__(self, controller: EzCVController):
         super().__init__()
         self._controller = controller
 
         self.operators = {cls.__name__: cls for cls in get_available_operators()}
 
-        self.operators_list = QListWidget(self)
-        self.operators_list.addItems(self.operators.keys())
+        self.available_operators_list = QListWidget(self)
+        self.available_operators_list.addItems(self.operators.keys())
 
-        self.operators_list.doubleClicked.connect(self.on_operator_selected)
+        self.available_operators_list.doubleClicked.connect(self.on_operator_selected)
 
     def on_operator_selected(self, index: QModelIndex):
         selected_operator = self.operators[index.data()]

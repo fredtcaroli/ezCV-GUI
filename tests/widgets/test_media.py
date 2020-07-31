@@ -38,7 +38,7 @@ class TestFilePopup:
             qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
             m.assert_called_once()
 
-    def test_emit_show_media_signal(self, qtbot, media_widget, controller, test_img_fname):
+    def test_load_media(self, qtbot, media_widget, controller, test_img_fname):
         with mock.patch.object(controller, 'load_media') as m:
             with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName',
                             mock.Mock(return_value=(test_img_fname, None))):
