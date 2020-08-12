@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QTabWidget
 
 from ezcv.operator import get_available_operators
 from ezcv.operator.implementations.blur import GaussianBlur
@@ -18,22 +19,22 @@ def pipeline_widget(qtbot, controller):
 
 
 @pytest.fixture
-def operators_list_widget(pipeline_widget):
-    return pipeline_widget.operators_list
+def operators_tab_widget(pipeline_widget):
+    return pipeline_widget.operators_tabs
 
 
-class TestOperatorsList:
-    def test_start_empty(self, operators_list_widget):
-        size = operators_list_widget.count()
+class TestOperatorsTabs:
+    def test_start_empty(self, operators_tab_widget):
+        size = operators_tab_widget.count()
         assert size == 0
 
-    def test_add_operator(self, operators_list_widget, controller):
+    def test_add_operator(self, operators_tab_widget: QTabWidget, controller):
         controller.add_operator(GaussianBlur)
-        size = operators_list_widget.count()
+        size = operators_tab_widget.count()
         assert size == 1
 
         operator_name = list(controller.operators.keys())[0]
-        name_in_list = operators_list_widget.item(0).text()
+        name_in_list = operators_tab_widget.tabText(0)
         assert name_in_list == operator_name
 
 

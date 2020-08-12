@@ -5,12 +5,12 @@ import pytest
 from PyQt5.QtCore import Qt
 
 from ezcv.test_utils import parametrize_img
-from ezcv_gui.widgets.media import MediaWidget
+from ezcv_gui.widgets.media import MediaPanelWidget
 
 
 @pytest.fixture
 def media_widget(qtbot, controller):
-    w = MediaWidget(controller)
+    w = MediaPanelWidget(controller)
     qtbot.addWidget(w)
     w.resize(800, 600)
     w.show()
@@ -20,7 +20,7 @@ def media_widget(qtbot, controller):
 @parametrize_img
 def test_show_media(controller, media_widget, img):
     controller.show_media.emit(img)
-    pix = media_widget.media_shower.pixmap()
+    pix = media_widget.media_display.pixmap()
     qimg = pix.toImage()
     if img.ndim == 2:
         img = np.repeat(img[..., None], 3, axis=2)

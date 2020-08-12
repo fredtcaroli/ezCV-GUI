@@ -1,4 +1,4 @@
-from typing import Type, Dict, Optional
+from typing import Type, Dict, Optional, Any
 
 import cv2
 from PyQt5.QtCore import pyqtSignal, QObject
@@ -11,6 +11,7 @@ from ezcv.typing import Image
 class EzCVController(QObject):
 
     show_media = pyqtSignal(Image)
+    operators_changed = pyqtSignal()
     operators_updated = pyqtSignal()
 
     def __init__(self):
@@ -20,21 +21,23 @@ class EzCVController(QObject):
         self.curr_media: Optional[Image] = None
         self._names_generator = _OperatorNameGenerator()
 
+        self.operators_changed.connect(self._on_operators_changed)
         self.operators_updated.connect(self._on_operators_updated)
-
-    def _on_operators_updated(self):
-        if self.curr_media is not None:
-            self.process_curr_media()
 
     def add_operator(self, operator_cls: Type[Operator]):
         operator = operator_cls()
         operator_name = self._names_generator.generate_name(operator_cls)
         self.cvpipeline.add_operator(operator_name, operator)
-        self.operators_updated.emit()
+        self.operators_changed.emit()
 
     def process_curr_media(self):
-        result_img, ctx = self.cvpipeline.run(self.curr_media)
-        self.show_media.emit(result_img)
+        if self.curr_media is not None:
+            result_img, ctx = self.cvpipeline.run(self.curr_media)
+            self.show_media.emit(result_img)
+
+    def update_operator(self, name: str, param_name: str, param_value: Any):
+        setattr(self.operators[name], param_name, param_value)
+        self.operators_updated.emit()
 
     def load_media(self, fname: str):
         img = cv2.imread(fname)
@@ -46,6 +49,12 @@ class EzCVController(QObject):
     @property
     def operators(self):
         return self.cvpipeline.operators
+
+    def _on_operators_changed(self):
+        self.process_curr_media()
+
+    def _on_operators_updated(self):
+        self.process_curr_media()
 
 
 class _OperatorNameGenerator:

@@ -36,7 +36,7 @@ class TestAddOperator:
         assert operators[0] != operators[1]
 
     def test_emit_signal(self, controller, qtbot):
-        with qtbot.waitSignal(controller.operators_updated, 100):
+        with qtbot.waitSignal(controller.operators_changed, 100):
             controller.add_operator(GaussianBlur)
 
     def test_process_media_if_available(self, controller, test_img):
@@ -44,12 +44,6 @@ class TestAddOperator:
         with mock.patch.object(controller, 'process_curr_media') as m:
             controller.add_operator(GaussianBlur)
             m.assert_called_once()
-
-    def test_dont_process_media_if_not_available(self, controller):
-        controller.curr_media = None
-        with mock.patch.object(controller, 'process_curr_media') as m:
-            controller.add_operator(GaussianBlur)
-            m.assert_not_called()
 
 
 class TestProcessCurrMedia:
@@ -70,6 +64,27 @@ class TestProcessCurrMedia:
         with qtbot.waitSignal(controller.show_media, 100):
             controller.process_curr_media()
 
+    def test_dont_process_media_if_not_available(self, controller):
+        controller.curr_media = None
+        with mock.patch.object(controller.cvpipeline, 'run') as m:
+            controller.process_curr_media()
+            m.assert_not_called()
+
+    def test_dont_emit_show_media_if_curr_media_is_not_available(self, controller, qtbot):
+        controller.curr_media = None
+
+        called = False
+
+        def on_media_show(_):
+            nonlocal called
+            called = True
+
+        controller.show_media.connect(on_media_show)
+        controller.process_curr_media()
+        qtbot.wait(100)
+
+        assert not called
+
 
 class TestLoadMedia:
     def test_run_cvpipeline_on_loaded_media(self, controller, test_img_fname):
@@ -86,3 +101,16 @@ class TestLoadMedia:
         with mock.patch.object(controller, 'process_curr_media') as m:
             controller.load_media(test_img_fname)
         m.assert_called_once()
+
+
+class TestUpdateOperator:
+    def test_golden(self, controller):
+        controller.add_operator(GaussianBlur)
+        updated_value = 123
+        controller.update_operator('GaussianBlur', 'kernel_size', updated_value)
+        assert controller.operators['GaussianBlur'].kernel_size == updated_value
+
+    def test_emit_operators_updated(self, controller, qtbot):
+        controller.add_operator(GaussianBlur)
+        with qtbot.waitSignal(controller.operators_updated, 100):
+            controller.update_operator('GaussianBlur', 'kernel_size', 123)

@@ -15,7 +15,7 @@ class EzCV(QMainWindow):
 
     def init_ui(self):
         self.statusBar()
-        self.setGeometry(300, 300, 800, 600)
         self.setWindowTitle('EzCV')
 
         self.setCentralWidget(self.central)
+        self.showMaximized()
