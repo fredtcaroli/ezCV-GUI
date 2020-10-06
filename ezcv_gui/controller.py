@@ -5,6 +5,7 @@ from PyQt5.QtCore import pyqtSignal, QObject
 
 from ezcv import CompVizPipeline
 from ezcv.operator import Operator
+from ezcv.pipeline.core import OperatorFailedError
 from ezcv.typing import Image
 
 
@@ -13,6 +14,7 @@ class EzCVController(QObject):
     show_media = pyqtSignal(Image)
     operators_changed = pyqtSignal()
     operators_updated = pyqtSignal()
+    operator_failed = pyqtSignal(OperatorFailedError)
 
     def __init__(self):
         super().__init__()
@@ -32,8 +34,12 @@ class EzCVController(QObject):
 
     def process_curr_media(self):
         if self.curr_media is not None:
-            result_img, ctx = self.cvpipeline.run(self.curr_media)
-            self.show_media.emit(result_img)
+            try:
+                result_img, ctx = self.cvpipeline.run(self.curr_media)
+                self.show_media.emit(result_img)
+            except OperatorFailedError as e:
+                self.operator_failed.emit(e)
+                self.show_media.emit(self.curr_media)
 
     def update_operator(self, name: str, param_name: str, param_value: Any):
         setattr(self.operators[name], param_name, param_value)
