@@ -4,6 +4,7 @@ import cv2
 from PyQt5.QtCore import pyqtSignal, QObject
 
 from ezcv import CompVizPipeline
+from ezcv.config import ConfigParsingError
 from ezcv.operator import Operator
 from ezcv.pipeline.core import OperatorFailedError
 from ezcv.typing import Image
@@ -15,6 +16,7 @@ class EzCVController(QObject):
     operators_changed = pyqtSignal()
     operators_updated = pyqtSignal()
     operator_failed = pyqtSignal(OperatorFailedError)
+    loading_failed = pyqtSignal(ConfigParsingError)
 
     def __init__(self):
         super().__init__()
@@ -51,6 +53,14 @@ class EzCVController(QObject):
             raise ValueError("Couldn't open image located at %s" % fname)
         self.curr_media = img
         self.process_curr_media()
+
+    def load_config(self, fname: str):
+        with open(fname, 'r') as fin:
+            try:
+                self.cvpipeline = CompVizPipeline.load(fin)
+                self.operators_changed.emit()
+            except ConfigParsingError as e:
+                self.loading_failed.emit(e)
 
     @property
     def operators(self):

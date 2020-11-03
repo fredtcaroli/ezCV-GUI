@@ -4,7 +4,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QGroupBox, QLabel, QSizePolicy, QGridLayout
 
 from ezcv.operator import Operator
-from ezcv.operator.core.config import get_parameters_specs
+from ezcv.config import get_parameters_specs
 from ezcv_gui.widgets.parameter import get_widget_for_parameter, ParameterWidgetMixin
 
 
