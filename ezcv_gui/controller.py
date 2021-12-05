@@ -1,3 +1,4 @@
+import traceback
 from typing import Type, Dict, Optional, Any
 
 import cv2
@@ -14,9 +15,9 @@ class EzCVController(QObject):
 
     show_media = pyqtSignal(Image)
     operators_changed = pyqtSignal()
-    operators_updated = pyqtSignal()
     operator_failed = pyqtSignal(OperatorFailedError)
     loading_failed = pyqtSignal(ConfigParsingError)
+    error = pyqtSignal(Exception)
 
     def __init__(self):
         super().__init__()
@@ -26,7 +27,6 @@ class EzCVController(QObject):
         self._names_generator = _OperatorNameGenerator()
 
         self.operators_changed.connect(self._on_operators_changed)
-        self.operators_updated.connect(self._on_operators_updated)
 
     def add_operator(self, operator_cls: Type[Operator]):
         operator = operator_cls()
@@ -34,18 +34,27 @@ class EzCVController(QObject):
         self.cvpipeline.add_operator(operator_name, operator)
         self.operators_changed.emit()
 
+    def remove_operator(self, index: int):
+        try:
+            self.cvpipeline.remove_operator(index)
+            self.operators_changed.emit()
+        except ValueError as e:
+            print(traceback.format_exc())
+            self.error.emit(e)
+
     def process_curr_media(self):
         if self.curr_media is not None:
             try:
                 result_img, ctx = self.cvpipeline.run(self.curr_media)
                 self.show_media.emit(result_img)
             except OperatorFailedError as e:
+                print(traceback.format_exc())
                 self.operator_failed.emit(e)
                 self.show_media.emit(self.curr_media)
 
     def update_operator(self, name: str, param_name: str, param_value: Any):
         setattr(self.operators[name], param_name, param_value)
-        self.operators_updated.emit()
+        self.operators_changed.emit()
 
     def load_media(self, fname: str):
         img = cv2.imread(fname)

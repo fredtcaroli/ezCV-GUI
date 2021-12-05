@@ -42,7 +42,6 @@ class OperatorConfigWidget(QGroupBox):
 
     def _set_operator(self, operator: Operator):
         operator_type = type(operator)
-        self.setTitle(type(operator).__name__)
         layout: QGridLayout = self.layout()
         params = get_parameters_specs(operator_type)
 

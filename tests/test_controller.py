@@ -110,7 +110,7 @@ class TestUpdateOperator:
         controller.update_operator('GaussianBlur', 'kernel_size', updated_value)
         assert controller.operators['GaussianBlur'].kernel_size == updated_value
 
-    def test_emit_operators_updated(self, controller, qtbot):
+    def test_emit_operators_changed(self, controller, qtbot):
         controller.add_operator(GaussianBlur)
-        with qtbot.waitSignal(controller.operators_updated, timeout=100):
+        with qtbot.waitSignal(controller.operators_changed, timeout=100):
             controller.update_operator('GaussianBlur', 'kernel_size', 123)

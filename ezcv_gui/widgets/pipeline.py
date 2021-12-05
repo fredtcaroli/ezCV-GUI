@@ -15,6 +15,8 @@ class PipelineWidget(QWidget):
         self._controller = controller
 
         self.operators_tabs = QTabWidget(self)
+        self.operators_tabs.setTabsClosable(True)
+        self.operators_tabs.tabCloseRequested.connect(self.on_tab_close_requested)
         self.add_operator_button = QPushButton('Add Operator', parent=self)
         self.add_operator_popup = AddOperatorWidget(self._controller)
 
@@ -38,14 +40,22 @@ class PipelineWidget(QWidget):
         self.add_operator_popup.show()
 
     def on_operators_changed(self):
-        for operator_config_widget in self.operators_config_widgets:
+        print('On operator changed called')
+        for i, operator_config_widget in enumerate(self.operators_config_widgets):
             operator_config_widget.setParent(None)
+            self.operators_tabs.removeTab(i)
+        self.operators_config_widgets = list()
         self.operators_tabs.clear()
 
         for operator_name, operator in self._controller.operators.items():
+            print(operator_name)
             op_config_widget = OperatorConfigWidget(operator)
             self.operators_tabs.addTab(op_config_widget, operator_name)
             op_config_widget.updated.connect(self._create_operator_updated_callback(operator_name))
+            self.operators_config_widgets.append(op_config_widget)
+
+    def on_tab_close_requested(self, index: int):
+        self._controller.remove_operator(index)
 
     def _create_operator_updated_callback(self, operator_name: str) -> Callable[[], None]:
         def callback(param_name: str, param_value: Any):
