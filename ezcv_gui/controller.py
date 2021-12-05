@@ -1,7 +1,7 @@
 from typing import Type, Dict, Optional, Any
 
 import cv2
-from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt6.QtCore import pyqtSignal, QObject
 
 from ezcv import CompVizPipeline
 from ezcv.config import ConfigParsingError

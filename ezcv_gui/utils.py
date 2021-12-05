@@ -1,5 +1,5 @@
 import numpy as np
-from PyQt5.QtGui import QImage
+from PyQt6.QtGui import QImage
 
 from ezcv.utils import is_image
 
@@ -16,5 +16,5 @@ def img2QImage(img: np.ndarray) -> QImage:
 
     height, width, _ = img.shape
     bytes_per_line = 3 * width
-    qimg = QImage(img.data, width, height, bytes_per_line, QImage.Format_RGB888)
+    qimg = QImage(img.data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
     return qimg

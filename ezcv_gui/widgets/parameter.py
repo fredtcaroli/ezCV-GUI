@@ -1,9 +1,8 @@
 from typing import Dict, Type, Callable, Union, TypeVar, Generic
 
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QIntValidator, QDoubleValidator
-from PyQt5.QtWidgets import QWidget, QLineEdit, QSlider, QHBoxLayout, QComboBox, QVBoxLayout, QLabel, QSpinBox, \
-    QDoubleSpinBox, QAbstractSpinBox, QSizePolicy
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import QWidget, QSlider, QHBoxLayout, QComboBox, QVBoxLayout, QLabel, QSpinBox, \
+    QDoubleSpinBox, QSizePolicy
 
 from ezcv.operator import ParameterSpec, IntegerParameter, DoubleParameter, EnumParameter
 
@@ -53,17 +52,20 @@ class _SliderWithMinMaxDisplay(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._slider = QSlider(Qt.Horizontal, self)
+        self._slider = QSlider(Qt.Orientation.Horizontal, self)
         self._slider.valueChanged.connect(self.valueChanged.emit)
-        self._label_minimum = QLabel(str(self._slider.minimum()), parent=parent, alignment=Qt.AlignLeft)
-        self._label_maximum = QLabel(str(self._slider.maximum()), parent=parent, alignment=Qt.AlignRight)
+        self._label_minimum = QLabel(str(self._slider.minimum()), parent=parent)
+        self._label_minimum.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self._label_maximum = QLabel(str(self._slider.maximum()), parent=parent)
 
         self.init_ui()
 
     def init_ui(self):
-        self._slider.setTickPosition(QSlider.NoTicks)
+        self._slider.setTickPosition(QSlider.TickPosition.NoTicks)
         self._slider.setSingleStep(1)
         self._slider.setMinimumWidth(100)
+        self._label_minimum.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self._label_maximum.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         main_layout = QVBoxLayout()
         slider_hbox = QHBoxLayout()
@@ -73,8 +75,8 @@ class _SliderWithMinMaxDisplay(QWidget):
 
         main_layout.addWidget(self._slider)
         main_layout.addLayout(slider_hbox)
-        slider_hbox.addWidget(self._label_minimum, Qt.AlignLeft)
-        slider_hbox.addWidget(self._label_maximum, Qt.AlignRight)
+        slider_hbox.addWidget(self._label_minimum, Qt.AlignmentFlag.AlignLeft)
+        slider_hbox.addWidget(self._label_maximum, Qt.AlignmentFlag.AlignRight)
 
         self.setLayout(main_layout)
 
@@ -120,7 +122,7 @@ _T = TypeVar('_T', IntegerParameter, DoubleParameter)
 
 class NumberParamWidgetBase(Generic[_T], ParameterWidgetMixin, QWidget):
     slider: _SliderWithMinMaxDisplay
-    number_display: QAbstractSpinBox
+    number_display: Union[QSpinBox, QDoubleSpinBox]
 
     def init_ui(self, param: _T):
         self.init_slider(param)
@@ -137,16 +139,16 @@ class NumberParamWidgetBase(Generic[_T], ParameterWidgetMixin, QWidget):
         self.slider.setMinimum(param.lower)
         self.slider.setMaximum(param.upper)
 
-        self.slider.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         self.slider.valueChanged.connect(self.on_slider_value_changed)
 
     def init_number_display(self, param: _T):
         self.number_display = self.get_number_display()
-        self.number_display.setMinimum(param.lower)
+        self.number_display. setMinimum(param.lower)
         self.number_display.setMaximum(param.upper)
 
-        self.number_display.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.number_display.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
         self.number_display.valueChanged.connect(self.on_number_display_changed)
 

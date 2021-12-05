@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 
 from ezcv_gui.main import EzCV
 
@@ -8,8 +8,7 @@ from ezcv_gui.main import EzCV
 def main():
     app = QApplication([])
     main_widget = EzCV()
-    main_widget.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == '__main__':

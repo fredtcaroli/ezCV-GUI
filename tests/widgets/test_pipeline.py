@@ -1,8 +1,8 @@
 from unittest import mock
 
 import pytest
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QTabWidget
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QTabWidget
 
 from ezcv.operator import get_available_operators
 from ezcv.operator.implementations.blur import GaussianBlur
@@ -39,8 +39,8 @@ class TestOperatorsTabs:
 
 
 def test_add_operator_button(qtbot, pipeline_widget):
-    with qtbot.waitExposed(pipeline_widget.add_operator_popup, 100):
-        qtbot.mouseClick(pipeline_widget.add_operator_button, Qt.LeftButton)
+    with qtbot.waitExposed(pipeline_widget.add_operator_popup, timeout=100):
+        qtbot.mouseClick(pipeline_widget.add_operator_button, Qt.MouseButton.LeftButton)
 
 
 @pytest.fixture
@@ -85,13 +85,13 @@ class TestAddOperatorPopup:
         with mock.patch.object(controller, 'add_operator') as m:
             qtbot.mouseClick(
                 available_operators_list_widget.viewport(),
-                Qt.LeftButton,
+                Qt.MouseButton.LeftButton,
                 pos=item_center,
                 delay=100
             )
             qtbot.mouseDClick(
                 available_operators_list_widget.viewport(),
-                Qt.LeftButton,
+                Qt.MouseButton.LeftButton,
                 pos=item_center,
                 delay=100
             )

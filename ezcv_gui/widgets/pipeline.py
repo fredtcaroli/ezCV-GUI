@@ -1,8 +1,8 @@
 from typing import List, Callable, Any
 
-from PyQt5.QtCore import Qt, QEvent
-from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QWidget, QListWidget, QPushButton, QVBoxLayout, QDialogButtonBox, QTabWidget
+from PyQt6.QtCore import Qt, QEvent
+from PyQt6.QtGui import QKeySequence
+from PyQt6.QtWidgets import QWidget, QListWidget, QPushButton, QVBoxLayout, QDialogButtonBox, QTabWidget
 
 from ezcv.operator import get_available_operators
 from ezcv_gui.controller import EzCVController
@@ -29,7 +29,7 @@ class PipelineWidget(QWidget):
     def init_ui(self):
         layout = QVBoxLayout(self)
 
-        layout.addWidget(self.add_operator_button, alignment=Qt.AlignHCenter)
+        layout.addWidget(self.add_operator_button, alignment=Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(self.operators_tabs)
 
         self.setLayout(layout)
@@ -56,7 +56,7 @@ class PipelineWidget(QWidget):
 class AddOperatorWidget(QWidget):
     def __init__(self, controller: EzCVController, parent=None):
         super().__init__(parent)
-        self.setWindowFlag(Qt.WindowStaysOnTopHint)
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
         self._controller = controller
         self.operators = {cls.__name__: cls for cls in get_available_operators()}
 
@@ -64,7 +64,9 @@ class AddOperatorWidget(QWidget):
         self.available_operators_list.doubleClicked.connect(self.accept_operator)
         self.available_operators_list.installEventFilter(self)
 
-        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box = QDialogButtonBox()
+        self.button_box.addButton("Ok", QDialogButtonBox.ButtonRole.AcceptRole)
+        self.button_box.addButton("Cancel", QDialogButtonBox.ButtonRole.RejectRole)
         self.button_box.accepted.connect(self.accept_operator)
         self.button_box.rejected.connect(self.hide)
 
@@ -89,9 +91,9 @@ class AddOperatorWidget(QWidget):
     def eventFilter(self, watched, event):
         """ Catch ENTER and ESC key presses
         """
-        if event.type() == QEvent.KeyPress:
-            if event.matches(QKeySequence.InsertParagraphSeparator):
+        if event.type() == QEvent.Type.KeyPress:
+            if event.matches(QKeySequence.StandardKey.InsertParagraphSeparator):
                 self.accept_operator()
-            elif event.matches(QKeySequence.Cancel):
+            elif event.matches(QKeySequence.StandardKey.Cancel):
                 self.hide()
         return False

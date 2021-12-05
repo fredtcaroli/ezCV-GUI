@@ -1,7 +1,7 @@
 from typing import Dict, Callable
 
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QGroupBox, QLabel, QSizePolicy, QGridLayout
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QGroupBox, QLabel, QSizePolicy, QGridLayout
 
 from ezcv.operator import Operator
 from ezcv.config import get_parameters_specs
@@ -48,13 +48,13 @@ class OperatorConfigWidget(QGroupBox):
 
         for row_nb, (param_name, param) in enumerate(params.items()):
             param_widget = get_widget_for_parameter(param)
-            param_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            param_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
             self.parameters_widgets[param_name] = param_widget
             param_value = getattr(operator, param_name)
             param_widget.set_value(param_value)
             param_widget.value_changed.connect(self._create_parameter_updated_callback(param_name))
             label = QLabel(param_name)
-            label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
             layout.addWidget(label, row_nb, 0)
             layout.addWidget(param_widget, row_nb, 1)
 

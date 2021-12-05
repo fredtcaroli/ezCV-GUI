@@ -1,7 +1,7 @@
 import numpy as np
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QResizeEvent
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QFileDialog, QVBoxLayout, QSizePolicy, QBoxLayout, QLayout
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QResizeEvent
+from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QFileDialog, QVBoxLayout
 
 from ezcv_gui.controller import EzCVController
 from ezcv_gui.utils import img2QImage
@@ -22,7 +22,7 @@ class MediaDisplay(QWidget):
         if pixmap is None:
             return
         pixsize = pixmap.size()
-        pixsize.scale(self.size(), Qt.KeepAspectRatio)
+        pixsize.scale(self.size(), Qt.AspectRatioMode.KeepAspectRatio)
         self._img_label.setFixedSize(pixsize)
 
     def setPixmap(self, pixmap: QPixmap):
@@ -49,7 +49,7 @@ class MediaPanelWidget(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout(self)
-        layout.addWidget(self.pick_file_button, alignment=Qt.AlignHCenter)
+        layout.addWidget(self.pick_file_button, alignment=Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(self.media_display)
 
         self._controller.show_media.connect(self.on_show_media)

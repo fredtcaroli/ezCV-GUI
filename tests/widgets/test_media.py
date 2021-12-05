@@ -2,7 +2,7 @@ from unittest import mock
 
 import numpy as np
 import pytest
-from PyQt5.QtCore import Qt
+from PyQt6.QtCore import Qt
 
 from ezcv.test_utils import parametrize_img
 from ezcv_gui.widgets.media import MediaPanelWidget
@@ -33,23 +33,23 @@ def test_show_media(controller, media_widget, img):
 
 class TestFilePopup:
     def test_dialog_call(self, qtbot, media_widget, test_img_fname):
-        with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as m:
+        with mock.patch('PyQt6.QtWidgets.QFileDialog.getOpenFileName') as m:
             m.return_value = (test_img_fname, None)
-            qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
+            qtbot.mouseClick(media_widget.pick_file_button, Qt.MouseButton.LeftButton)
             m.assert_called_once()
 
     def test_load_media(self, qtbot, media_widget, controller, test_img_fname):
         with mock.patch.object(controller, 'load_media') as m:
-            with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName',
+            with mock.patch('PyQt6.QtWidgets.QFileDialog.getOpenFileName',
                             mock.Mock(return_value=(test_img_fname, None))):
-                qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
+                qtbot.mouseClick(media_widget.pick_file_button, Qt.MouseButton.LeftButton)
                 qtbot.wait(100)
         m.assert_called_with(test_img_fname)
 
     def test_cancel_dialog(self, qtbot, media_widget, controller):
         with mock.patch.object(controller, 'load_media') as m:
-            with mock.patch('PyQt5.QtWidgets.QFileDialog.getOpenFileName') as dialog_m:
+            with mock.patch('PyQt6.QtWidgets.QFileDialog.getOpenFileName') as dialog_m:
                 dialog_m.return_value = ('', None)
-                qtbot.mouseClick(media_widget.pick_file_button, Qt.LeftButton)
+                qtbot.mouseClick(media_widget.pick_file_button, Qt.MouseButton.LeftButton)
                 qtbot.wait(100)
         m.assert_not_called()

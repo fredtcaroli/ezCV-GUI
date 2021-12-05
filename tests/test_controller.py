@@ -36,7 +36,7 @@ class TestAddOperator:
         assert operators[0] != operators[1]
 
     def test_emit_signal(self, controller, qtbot):
-        with qtbot.waitSignal(controller.operators_changed, 100):
+        with qtbot.waitSignal(controller.operators_changed, timeout=100):
             controller.add_operator(GaussianBlur)
 
     def test_process_media_if_available(self, controller, test_img):
@@ -61,7 +61,7 @@ class TestProcessCurrMedia:
             assert img is test_img
 
         controller.show_media.connect(on_media_show)
-        with qtbot.waitSignal(controller.show_media, 100):
+        with qtbot.waitSignal(controller.show_media, timeout=100):
             controller.process_curr_media()
 
     def test_dont_process_media_if_not_available(self, controller):
@@ -112,5 +112,5 @@ class TestUpdateOperator:
 
     def test_emit_operators_updated(self, controller, qtbot):
         controller.add_operator(GaussianBlur)
-        with qtbot.waitSignal(controller.operators_updated, 100):
+        with qtbot.waitSignal(controller.operators_updated, timeout=100):
             controller.update_operator('GaussianBlur', 'kernel_size', 123)

@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QMainWindow, QMessageBox, QAction, QFileDialog
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QFileDialog
+from PyQt6.QtGui import QAction
 
 from ezcv_gui.controller import EzCVController
 from ezcv_gui.widgets.central import CentralWidget
