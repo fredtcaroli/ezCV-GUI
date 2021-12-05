@@ -47,12 +47,47 @@ def get_widget_for_parameter(param: ParameterSpec) -> ParameterWidget:
     return widget(param)
 
 
+class _SliderWithIntervalSize(QSlider):
+    """ Copied from https://stackoverflow.com/questions/4827885/qslider-stepping"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._min = 0
+        self._max = 99
+        self.interval = 1
+
+    def setValue(self, value: int):
+        index = round((value - self._min) / self.interval)
+        return super().setValue(index)
+
+    def value(self):
+        return super().value() * self.interval + self._min
+
+    def setMinimum(self, value):
+        self._min = value
+        self._range_adjusted()
+
+    def setMaximum(self, value):
+        self._max = value
+        self._range_adjusted()
+
+    def setInterval(self, value: int):
+        # To avoid division by zero
+        if value == 0:
+            raise ValueError('Interval can\'t be zero')
+        self.interval = value
+        self._range_adjusted()
+
+    def _range_adjusted(self):
+        number_of_steps = int((self._max - self._min) / self.interval)
+        super().setMaximum(number_of_steps)
+
+
 class _SliderWithMinMaxDisplay(QWidget):
     valueChanged = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._slider = QSlider(Qt.Orientation.Horizontal, self)
+        self._slider = _SliderWithIntervalSize(Qt.Orientation.Horizontal, self)
         self._slider.valueChanged.connect(self.valueChanged.emit)
         self._label_minimum = QLabel(str(self._slider.minimum()), parent=parent)
         self._label_minimum.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -62,7 +97,6 @@ class _SliderWithMinMaxDisplay(QWidget):
 
     def init_ui(self):
         self._slider.setTickPosition(QSlider.TickPosition.NoTicks)
-        self._slider.setSingleStep(1)
         self._slider.setMinimumWidth(100)
         self._label_minimum.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self._label_maximum.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -90,6 +124,9 @@ class _SliderWithMinMaxDisplay(QWidget):
 
     def setValue(self, value: int):
         self._slider.setValue(value)
+
+    def setInterval(self, step_size: int):
+        self._slider.setInterval(step_size)
 
     def value(self):
         return self._slider.value()
@@ -138,6 +175,7 @@ class NumberParamWidgetBase(Generic[_T], ParameterWidgetMixin, QWidget):
         self.slider = self.get_slider()
         self.slider.setMinimum(param.lower)
         self.slider.setMaximum(param.upper)
+        self.slider.setInterval(param.step_size)
 
         self.slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
@@ -147,6 +185,7 @@ class NumberParamWidgetBase(Generic[_T], ParameterWidgetMixin, QWidget):
         self.number_display = self.get_number_display()
         self.number_display. setMinimum(param.lower)
         self.number_display.setMaximum(param.upper)
+        self.number_display.setSingleStep(param.step_size)
 
         self.number_display.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
@@ -190,7 +229,6 @@ class DoubleParamWidget(NumberParamWidgetBase[DoubleParameter]):
     def get_number_display(self):
         spin_box = QDoubleSpinBox()
         spin_box.setDecimals(2)
-        spin_box.setSingleStep(0.01)
         return spin_box
 
 
