@@ -71,6 +71,14 @@ class EzCVController(QObject):
             except ConfigParsingError as e:
                 self.loading_failed.emit(e)
 
+    def save_config(self, fname: str):
+        with open(fname, 'w') as fout:
+            try:
+                self.cvpipeline.save(fout)
+            except Exception as e:
+                print(traceback.format_exc())
+                self.error.emit(e)
+
     @property
     def operators(self):
         return self.cvpipeline.operators

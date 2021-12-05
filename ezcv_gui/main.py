@@ -27,10 +27,16 @@ class EzCV(QMainWindow):
         load_action = QAction('&Open', self)
         load_action.setShortcut('Ctrl+O')
         load_action.triggered.connect(self.on_load_action)
+
+        save_action = QAction('&Save', self)
+        save_action.setShortcut('Ctrl+S')
+        save_action.triggered.connect(self.on_save_action)
+
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
         file_menu = menubar.addMenu('&File')
         file_menu.addAction(load_action)
+        file_menu.addAction(save_action)
 
     def init_signals(self):
         self._controller.operator_failed.connect(self.on_operator_failed)
@@ -40,10 +46,15 @@ class EzCV(QMainWindow):
         QMessageBox.critical(self, "Error", str(exception))
 
     def on_load_action(self):
-        fname, _ = QFileDialog.getOpenFileName(self, 'Pick Config File', '~', 'YAML Files(*.yaml *.yml)')
+        fname, _ = QFileDialog.getOpenFileName(self, 'Pick Config File', 'config.yaml', 'YAML Files(*.yaml *.yml)')
         if fname is not None:
             self._controller.load_config(fname)
 
     def on_loading_failed(self, exception):
         msgs = [str(a) for a in exception.args]
         QMessageBox.critical(self, "Loading Error", '\n'.join(msgs))
+
+    def on_save_action(self):
+        fname, _ = QFileDialog.getSaveFileName(self, 'Choose File Name', 'config.yaml', 'YAML Files(*.yaml *.yml)')
+        if fname is not None:
+            self._controller.save_config(fname)
