@@ -40,22 +40,28 @@ class PipelineWidget(QWidget):
         self.add_operator_popup.show()
 
     def on_operators_changed(self):
-        print('On operator changed called')
+        curr_idx = self.operators_tabs.currentIndex()
+        self._clear_tabs()
+        self._create_tabs()
+        select_index = max(min(curr_idx, len(self._controller.operators) - 1), 0)
+        self.operators_tabs.setCurrentIndex(select_index)
+
+    def on_tab_close_requested(self, index: int):
+        self._controller.remove_operator(index)
+
+    def _clear_tabs(self):
         for i, operator_config_widget in enumerate(self.operators_config_widgets):
             operator_config_widget.setParent(None)
-            self.operators_tabs.removeTab(i)
         self.operators_config_widgets = list()
         self.operators_tabs.clear()
 
-        for operator_name, operator in self._controller.operators.items():
-            print(operator_name)
+    def _create_tabs(self):
+        operators = self._controller.operators
+        for operator_name, operator in operators.items():
             op_config_widget = OperatorConfigWidget(operator)
             self.operators_tabs.addTab(op_config_widget, operator_name)
             op_config_widget.updated.connect(self._create_operator_updated_callback(operator_name))
             self.operators_config_widgets.append(op_config_widget)
-
-    def on_tab_close_requested(self, index: int):
-        self._controller.remove_operator(index)
 
     def _create_operator_updated_callback(self, operator_name: str) -> Callable[[], None]:
         def callback(param_name: str, param_value: Any):
