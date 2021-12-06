@@ -1,10 +1,11 @@
+from enum import Enum
 from typing import Dict, Type, Callable, Union, TypeVar, Generic
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QSlider, QHBoxLayout, QComboBox, QVBoxLayout, QLabel, QSpinBox, \
-    QDoubleSpinBox, QSizePolicy
+    QDoubleSpinBox, QSizePolicy, QCheckBox
 
-from ezcv.operator import ParameterSpec, IntegerParameter, DoubleParameter, EnumParameter
+from ezcv.operator import ParameterSpec, IntegerParameter, DoubleParameter, EnumParameter, BooleanParameter
 
 
 class ParameterWidgetMixin:
@@ -245,3 +246,19 @@ class EnumParameterWidget(ParameterWidgetMixin, QComboBox):
 
     def get_value(self) -> str:
         return self.currentText()
+
+
+@param_widget(BooleanParameter)
+class BooleanParameterWidget(ParameterWidgetMixin, QCheckBox):
+    def init_ui(self, param: BooleanParameter):
+        self.stateChanged.connect(self._on_state_changed)
+
+    def set_value(self, value: bool):
+        check_state = Qt.CheckState.Checked if value else Qt.CheckState.Unchecked
+        self.setCheckState(check_state)
+
+    def get_value(self) -> bool:
+        return self.checkState().value == Qt.CheckState.Checked.value
+
+    def _on_state_changed(self, state: Enum):
+        self.value_changed.emit()
