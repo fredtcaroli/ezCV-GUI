@@ -44,6 +44,14 @@ class EzCVController(QObject):
             print(traceback.format_exc())
             self.error.emit(e)
 
+    def move_operator(self, src: int, target: int):
+        try:
+            self.cvpipeline.move_operator(src, target)
+            self.operators_list_updated.emit()
+        except ValueError as e:
+            print(traceback.format_exc())
+            self.error.emit(e)
+
     def process_curr_media(self):
         if self.curr_media is not None:
             try:

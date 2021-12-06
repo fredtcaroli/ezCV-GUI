@@ -2,7 +2,8 @@ from typing import List, Callable, Any
 
 from PyQt6.QtCore import Qt, QEvent
 from PyQt6.QtGui import QKeySequence
-from PyQt6.QtWidgets import QWidget, QListWidget, QPushButton, QVBoxLayout, QDialogButtonBox, QTabWidget
+from PyQt6.QtWidgets import QWidget, QListWidget, QPushButton, QVBoxLayout, QDialogButtonBox, QTabWidget, QStyle, \
+    QHBoxLayout
 
 from ezcv.operator import get_available_operators
 from ezcv_gui.controller import EzCVController
@@ -16,24 +17,55 @@ class PipelineWidget(QWidget):
 
         self.operators_tabs = OperatorsTabsWidget(self._controller, parent=self)
         self.add_operator_button = QPushButton('Add Operator', parent=self)
+        self.move_operator_right_button = QPushButton(parent=self)
+        self.move_operator_left_button = QPushButton(parent=self)
         self.add_operator_popup = AddOperatorWidget(self._controller)
 
         self.add_operator_button.clicked.connect(self.on_add_operator_button_click)
         self.add_operator_button.setShortcut("A")
+        self.move_operator_left_button.clicked.connect(self.on_move_operator_left)
+        self.move_operator_right_button.clicked.connect(self.on_move_operator_right)
         self._controller.operators_list_updated.connect(self.operators_tabs.refresh)
 
         self.init_ui()
 
     def init_ui(self):
+        self.move_operator_left_button.setIcon(
+            self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowLeft)
+        )
+        self.move_operator_right_button.setIcon(
+            self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowRight)
+        )
         layout = QVBoxLayout(self)
 
-        layout.addWidget(self.add_operator_button, alignment=Qt.AlignmentFlag.AlignHCenter)
+        operators_management_layout = QHBoxLayout(self)
+        operators_management_layout.addWidget(self.move_operator_left_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        operators_management_layout.addWidget(self.add_operator_button, alignment=Qt.AlignmentFlag.AlignCenter)
+        operators_management_layout.addWidget(self.move_operator_right_button, alignment=Qt.AlignmentFlag.AlignRight)
+
+        layout.addLayout(operators_management_layout)
         layout.addWidget(self.operators_tabs)
 
         self.setLayout(layout)
 
     def on_add_operator_button_click(self):
         self.add_operator_popup.show()
+
+    def on_move_operator_left(self):
+        selected_operator = self.operators_tabs.currentIndex()
+        if selected_operator <= 0:
+            return
+        target = selected_operator - 1
+        self._controller.move_operator(selected_operator, target)
+        self.operators_tabs.setCurrentIndex(target)
+
+    def on_move_operator_right(self):
+        selected_operator = self.operators_tabs.currentIndex()
+        if selected_operator == -1 or selected_operator == self.operators_tabs.count() - 1:
+            return
+        target = selected_operator + 1
+        self._controller.move_operator(selected_operator, target)
+        self.operators_tabs.setCurrentIndex(target)
 
 
 class OperatorsTabsWidget(QTabWidget):
