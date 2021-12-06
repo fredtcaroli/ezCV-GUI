@@ -14,7 +14,8 @@ from ezcv.typing import Image
 class EzCVController(QObject):
 
     show_media = pyqtSignal(Image)
-    operators_changed = pyqtSignal()
+    operators_list_updated = pyqtSignal()
+    operator_parameter_updated = pyqtSignal()
     operator_failed = pyqtSignal(OperatorFailedError)
     loading_failed = pyqtSignal(ConfigParsingError)
     error = pyqtSignal(Exception)
@@ -26,18 +27,19 @@ class EzCVController(QObject):
         self.curr_media: Optional[Image] = None
         self._names_generator = _OperatorNameGenerator()
 
-        self.operators_changed.connect(self._on_operators_changed)
+        self.operators_list_updated.connect(self._on_operators_list_updated)
+        self.operator_parameter_updated.connect(self._on_operator_parameter_updated)
 
     def add_operator(self, operator_cls: Type[Operator]):
         operator = operator_cls()
         operator_name = self._names_generator.generate_name(operator_cls)
         self.cvpipeline.add_operator(operator_name, operator)
-        self.operators_changed.emit()
+        self.operators_list_updated.emit()
 
     def remove_operator(self, index: int):
         try:
             self.cvpipeline.remove_operator(index)
-            self.operators_changed.emit()
+            self.operators_list_updated.emit()
         except ValueError as e:
             print(traceback.format_exc())
             self.error.emit(e)
@@ -52,9 +54,9 @@ class EzCVController(QObject):
                 self.operator_failed.emit(e)
                 self.show_media.emit(self.curr_media)
 
-    def update_operator(self, name: str, param_name: str, param_value: Any):
+    def update_operator_parameter(self, name: str, param_name: str, param_value: Any):
         setattr(self.operators[name], param_name, param_value)
-        self.operators_changed.emit()
+        self.operator_parameter_updated.emit()
 
     def load_media(self, fname: str):
         img = cv2.imread(fname)
@@ -67,7 +69,7 @@ class EzCVController(QObject):
         with open(fname, 'r') as fin:
             try:
                 self.cvpipeline = CompVizPipeline.load(fin)
-                self.operators_changed.emit()
+                self.operators_list_updated.emit()
             except ConfigParsingError as e:
                 self.loading_failed.emit(e)
 
@@ -83,10 +85,10 @@ class EzCVController(QObject):
     def operators(self):
         return self.cvpipeline.operators
 
-    def _on_operators_changed(self):
+    def _on_operators_list_updated(self):
         self.process_curr_media()
 
-    def _on_operators_updated(self):
+    def _on_operator_parameter_updated(self):
         self.process_curr_media()
 
 

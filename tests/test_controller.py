@@ -36,7 +36,7 @@ class TestAddOperator:
         assert operators[0] != operators[1]
 
     def test_emit_signal(self, controller, qtbot):
-        with qtbot.waitSignal(controller.operators_changed, timeout=100):
+        with qtbot.waitSignal(controller.operators_list_updated, timeout=100):
             controller.add_operator(GaussianBlur)
 
     def test_process_media_if_available(self, controller, test_img):
@@ -104,13 +104,15 @@ class TestLoadMedia:
 
 
 class TestUpdateOperator:
-    def test_golden(self, controller):
+    def test_happy_path(self, controller):
         controller.add_operator(GaussianBlur)
         updated_value = 123
-        controller.update_operator('GaussianBlur', 'kernel_size', updated_value)
+        with mock.patch.object(controller, 'process_curr_media') as m:
+            controller.update_operator_parameter('GaussianBlur', 'kernel_size', updated_value)
         assert controller.operators['GaussianBlur'].kernel_size == updated_value
+        m.assert_called_once()
 
     def test_emit_operators_changed(self, controller, qtbot):
         controller.add_operator(GaussianBlur)
-        with qtbot.waitSignal(controller.operators_changed, timeout=100):
-            controller.update_operator('GaussianBlur', 'kernel_size', 123)
+        with qtbot.waitSignal(controller.operator_parameter_updated, timeout=100):
+            controller.update_operator_parameter('GaussianBlur', 'kernel_size', 123)

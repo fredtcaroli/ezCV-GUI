@@ -22,7 +22,7 @@ class PipelineWidget(QWidget):
 
         self.add_operator_button.clicked.connect(self.on_add_operator_button_click)
         self.add_operator_button.setShortcut("A")
-        self._controller.operators_changed.connect(self.on_operators_changed)
+        self._controller.operators_list_updated.connect(self.on_operators_changed)
 
         self.operators_config_widgets: List[OperatorConfigWidget] = list()
 
@@ -65,7 +65,7 @@ class PipelineWidget(QWidget):
 
     def _create_operator_updated_callback(self, operator_name: str) -> Callable[[], None]:
         def callback(param_name: str, param_value: Any):
-            self._controller.update_operator(operator_name, param_name, param_value)
+            self._controller.update_operator_parameter(operator_name, param_name, param_value)
         return callback
 
 
