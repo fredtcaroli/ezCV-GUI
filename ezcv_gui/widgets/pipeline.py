@@ -14,17 +14,13 @@ class PipelineWidget(QWidget):
         super().__init__(parent=parent)
         self._controller = controller
 
-        self.operators_tabs = QTabWidget(self)
-        self.operators_tabs.setTabsClosable(True)
-        self.operators_tabs.tabCloseRequested.connect(self.on_tab_close_requested)
+        self.operators_tabs = OperatorsTabsWidget(self._controller, parent=self)
         self.add_operator_button = QPushButton('Add Operator', parent=self)
         self.add_operator_popup = AddOperatorWidget(self._controller)
 
         self.add_operator_button.clicked.connect(self.on_add_operator_button_click)
         self.add_operator_button.setShortcut("A")
-        self._controller.operators_list_updated.connect(self.on_operators_changed)
-
-        self.operators_config_widgets: List[OperatorConfigWidget] = list()
+        self._controller.operators_list_updated.connect(self.operators_tabs.refresh)
 
         self.init_ui()
 
@@ -39,27 +35,37 @@ class PipelineWidget(QWidget):
     def on_add_operator_button_click(self):
         self.add_operator_popup.show()
 
-    def on_operators_changed(self):
-        curr_idx = self.operators_tabs.currentIndex()
-        self._clear_tabs()
-        self._create_tabs()
-        select_index = max(min(curr_idx, len(self._controller.operators) - 1), 0)
-        self.operators_tabs.setCurrentIndex(select_index)
+
+class OperatorsTabsWidget(QTabWidget):
+    def __init__(self, controller: EzCVController, parent=None):
+        super().__init__(parent=parent)
+        self._controller = controller
+        self.setTabsClosable(True)
+        self.tabCloseRequested.connect(self.on_tab_close_requested)
+
+        self.operators_config_widgets: List[OperatorConfigWidget] = list()
 
     def on_tab_close_requested(self, index: int):
         self._controller.remove_operator(index)
+
+    def refresh(self):
+        curr_idx = self.currentIndex()
+        self._clear_tabs()
+        self._create_tabs()
+        select_index = max(min(curr_idx, len(self._controller.operators) - 1), 0)
+        self.setCurrentIndex(select_index)
 
     def _clear_tabs(self):
         for i, operator_config_widget in enumerate(self.operators_config_widgets):
             operator_config_widget.setParent(None)
         self.operators_config_widgets = list()
-        self.operators_tabs.clear()
+        self.clear()
 
     def _create_tabs(self):
         operators = self._controller.operators
         for operator_name, operator in operators.items():
             op_config_widget = OperatorConfigWidget(operator)
-            self.operators_tabs.addTab(op_config_widget, operator_name)
+            self.addTab(op_config_widget, operator_name)
             op_config_widget.updated.connect(self._create_operator_updated_callback(operator_name))
             self.operators_config_widgets.append(op_config_widget)
 
