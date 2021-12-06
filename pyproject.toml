@@ -6,7 +6,7 @@ authors = ["Frederico Tommasi Caroli"]
 
 [tool.poetry.dependencies]
 python = "^3.7,<3.11"
-ezcv = { path = "../ezCV", develop = true }
+ezcv = { git = "https://github.com/fredtcaroli/ezCV" }
 PyQt6 = "^6.2.2"
 numpy = "^1.21.4"
 
