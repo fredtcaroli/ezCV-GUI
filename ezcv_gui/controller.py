@@ -52,6 +52,22 @@ class EzCVController(QObject):
             print(traceback.format_exc())
             self.error.emit(e)
 
+    def get_operator_name(self, index: int) -> str:
+        try:
+            name = self.cvpipeline.get_operator_name(index)
+            return name
+        except ValueError as e:
+            print(traceback.format_exc())
+            self.error.emit(e)
+
+    def rename_operator(self, index: int, new_name: str):
+        try:
+            self.cvpipeline.rename_operator(index, new_name)
+            self.operators_list_updated.emit()
+        except ValueError as e:
+            print(traceback.format_exc())
+            self.error.emit(e)
+
     def process_curr_media(self):
         if self.curr_media is not None:
             try:

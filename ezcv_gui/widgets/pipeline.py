@@ -3,7 +3,7 @@ from typing import List, Callable, Any
 from PyQt6.QtCore import Qt, QEvent
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import QWidget, QListWidget, QPushButton, QVBoxLayout, QDialogButtonBox, QTabWidget, QStyle, \
-    QHBoxLayout
+    QHBoxLayout, QInputDialog
 
 from ezcv.operator import get_available_operators
 from ezcv_gui.controller import EzCVController
@@ -74,11 +74,20 @@ class OperatorsTabsWidget(QTabWidget):
         self._controller = controller
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(self.on_tab_close_requested)
+        self.tabBarDoubleClicked.connect(self.on_tab_bar_double_clicked)
 
         self.operators_config_widgets: List[OperatorConfigWidget] = list()
 
     def on_tab_close_requested(self, index: int):
         self._controller.remove_operator(index)
+
+    def on_tab_bar_double_clicked(self, index: int):
+        curr_name = self._controller.get_operator_name(index)
+        if curr_name is None:
+            return
+        new_name, ok = QInputDialog.getText(self, 'Edit Operator Name', 'Operator name:', text=curr_name)
+        if ok:
+            self._controller.rename_operator(index, new_name)
 
     def refresh(self):
         curr_idx = self.currentIndex()
