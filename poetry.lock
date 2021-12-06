@@ -43,7 +43,7 @@ description = ""
 category = "main"
 optional = false
 python-versions = "^3.7,<3.11"
-develop = true
+develop = false
 
 [package.dependencies]
 Cerberus = "^1.3.4"
@@ -51,8 +51,10 @@ numpy = "^1.21.4"
 PyYAML = "^6.0"
 
 [package.source]
-type = "directory"
-url = "../ezCV"
+type = "git"
+url = "https://github.com/fredtcaroli/ezCV"
+reference = "master"
+resolved_reference = "bc40b91e1f7afccd6635de1558a632d5eb32676c"
 
 [[package]]
 name = "importlib-metadata"
@@ -247,7 +249,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7,<3.11"
-content-hash = "018c3e4aa864133d4f85308680239212f815bd542a35c58ab8c5c8334315f52e"
+content-hash = "1f8cc5a31e2656bf6f41a64a464b78c67883f5cd13aef1d42266d20a999c159d"
 
 [metadata.files]
 atomicwrites = [
