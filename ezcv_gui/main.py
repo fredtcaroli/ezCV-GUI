@@ -41,18 +41,23 @@ class EzCV(QMainWindow):
     def init_signals(self):
         self._controller.operator_failed.connect(self.on_operator_failed)
         self._controller.loading_failed.connect(self.on_loading_failed)
-
-    def on_operator_failed(self, exception):
-        QMessageBox.critical(self, "Error", str(exception))
+        self._controller.error.connect(self.on_unexpected_error)
 
     def on_load_action(self):
         fname, _ = QFileDialog.getOpenFileName(self, 'Pick Config File', 'config.yaml', 'YAML Files(*.yaml *.yml)')
         if fname is not None:
             self._controller.load_config(fname)
 
-    def on_loading_failed(self, exception):
+    def on_operator_failed(self, exception: Exception):
+        QMessageBox.critical(self, "Operator Error", str(exception))
+
+    def on_loading_failed(self, exception: Exception):
         msgs = [str(a) for a in exception.args]
         QMessageBox.critical(self, "Loading Error", '\n'.join(msgs))
+
+    def on_unexpected_error(self, exception: Exception):
+        msgs = [str(a) for a in exception.args]
+        QMessageBox.critical(self, 'Unexpected Error', '\n'.join(msgs))
 
     def on_save_action(self):
         fname, _ = QFileDialog.getSaveFileName(self, 'Choose File Name', 'config.yaml', 'YAML Files(*.yaml *.yml)')
