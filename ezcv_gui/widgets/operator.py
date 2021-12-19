@@ -4,7 +4,6 @@ from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QGroupBox, QLabel, QSizePolicy, QGridLayout
 
 from ezcv.operator import Operator
-from ezcv.config import get_parameters_specs
 from ezcv_gui.widgets.parameter import get_widget_for_parameter, ParameterWidgetMixin
 
 
@@ -41,10 +40,9 @@ class OperatorConfigWidget(QGroupBox):
         self._set_operator(operator)
 
     def _set_operator(self, operator: Operator):
-        operator_type = type(operator)
         layout: QGridLayout = self.layout()
-        params = get_parameters_specs(operator_type)
 
+        params = operator.get_parameters_specs()
         for row_nb, (param_name, param) in enumerate(params.items()):
             param_widget = get_widget_for_parameter(param)
             param_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
