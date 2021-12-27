@@ -1,4 +1,8 @@
+import importlib
 import sys
+from typing import List
+
+import click
 import importlib_metadata
 
 from PyQt6.QtWidgets import QApplication
@@ -6,8 +10,11 @@ from PyQt6.QtWidgets import QApplication
 from ezcv_gui.main import EzCV
 
 
-def main():
+@click.command(name='ezCV-GUI')
+@click.option('--include', '-i', multiple=True)
+def ezcv_gui(include):
     load_operators()
+    load_includes(include)
     app = QApplication([])
     main_widget = EzCV()
     sys.exit(app.exec())
@@ -20,5 +27,11 @@ def load_operators():
         entry_point.load()
 
 
+def load_includes(includes: List[str]):
+    for include in includes:
+        print(f'Loading module "{include}"')
+        importlib.import_module(include)
+
+
 if __name__ == '__main__':
-    main()
+    ezcv_gui()

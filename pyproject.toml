@@ -11,6 +11,7 @@ ezcv_operators = { git = "https://github.com/fredtcaroli/ezCV-operators" }
 PyQt6 = "^6.2.2"
 numpy = "^1.21.4"
 importlib-metadata = "^4.10.0"
+click = "^8.0.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
