@@ -5,9 +5,8 @@ import cv2
 from PyQt6.QtCore import pyqtSignal, QObject
 
 from ezcv import CompVizPipeline
-from ezcv.config import ConfigParsingError
 from ezcv.operator import Operator
-from ezcv.exceptions import OperatorFailedError
+from ezcv.exceptions import OperatorFailedError, ConfigParsingError
 from ezcv.typing import Image
 
 
