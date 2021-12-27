@@ -7,7 +7,7 @@ from PyQt6.QtCore import pyqtSignal, QObject
 from ezcv import CompVizPipeline
 from ezcv.config import ConfigParsingError
 from ezcv.operator import Operator
-from ezcv.pipeline.core import OperatorFailedError
+from ezcv.exceptions import OperatorFailedError
 from ezcv.typing import Image
 
 
